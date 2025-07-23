@@ -3,10 +3,10 @@ const router = express.Router();
 const User = require('../models/User');
 const { authMiddleware } = require('../middleware/authMiddleware');
 
-// GET /api/users/me → get logged-in user's profile
+// ✅ Get logged-in user's profile
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password'); // fixed key
+    const user = await User.findById(req.user.userId).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.status(200).json(user);
   } catch (error) {
@@ -15,7 +15,7 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// PUT /api/users/me → update logged-in user's profile
+// ✅ Update logged-in user's profile
 router.put('/me', authMiddleware, async (req, res) => {
   try {
     const updates = req.body;
@@ -31,5 +31,15 @@ router.put('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ NEW: List available donors
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const donors = await User.find({ isDonor: true, availability: true }).select('-password');
+    res.status(200).json(donors);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error fetching donors' });
+  }
+});
 
 module.exports = router;
